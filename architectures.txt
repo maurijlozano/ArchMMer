@@ -1,0 +1,2 @@
+# Space separated list HMM ids for the desired domain architecture, Space separated list of HMM ids to exclude of the desired domain architecture, Space separated list HMM ids to search in the neighbor proteins, min size, max size
+PF00990 PF00563,PF00072 PF05228,PF00587 PF03129 TIGR00418 G3DSA:3.30.980.10,0,10000

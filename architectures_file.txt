@@ -1,0 +1,2 @@
+# Space separated list HMMfiles for the desired domain architecture, Space separated list of HMM files to exclude of the desired domain architecture, Space separated list HMM files to search in the neighbor proteins, min size, max size
+PF00990.hmm PF00563.hmm, PF00072.hmm PF05228.hmm, TIGR00418.hmm G3DSA:3.30.980.10.hmm,0,10000

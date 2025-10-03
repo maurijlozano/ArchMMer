@@ -532,7 +532,7 @@ if __name__ == '__main__':
         print(f'Downloading genomes...')
         getSeqsFromNCBI(queryGenus,inputFolder,numSeqs)
         genomes = glob.glob(os.path.join(inputFolder,"*.gb"))
-    elif (args.accessions) and (len() > 0):
+    elif (args.accessions) and (len(args.accessions) > 0):
         if args.downloadFolder:
             inputFolder = args.downloadFolder
         else:

@@ -853,4 +853,5 @@ if __name__ == '__main__':
     filtered_summary_table = summary_table.groupby('UID',as_index=False).first()
     filtered_summary_table = filtered_summary_table.sort_values(['UID'])
     save_file_best = os.path.join(inputFolder, 'best_Architectures.csv')
+    filtered_summary_table = filtered_summary_table.drop(['Architecture_len'], axis=1)
     filtered_summary_table.to_csv(save_file_best, index=False)

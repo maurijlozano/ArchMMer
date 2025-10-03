@@ -231,7 +231,7 @@ def download_architecture_pfams(pfamids,type):
                 pfam_file = os.path.join(pfam_hmm_folder, pfamid+'.hmm')
                 if not pfam_file in hmms:
                     download_pfam_hmm(pfamid, pfam_file)
-                    hmms.append(pfam_file)
+                hmms.append(pfam_file)
         test_file_list(hmms)
         return(hmms)
     else:
@@ -342,23 +342,28 @@ def load_genome(genome_file):
 def search_by_architecture(genome_file, genome_name, hmms, genome_folder, evalue, hmm_coverage, exclude_file, genbankDict, proteomeFile, min_size, max_size):
     already_looked_for = []
     all_hits_table = pd.DataFrame()
+    i=0
     for hmm in hmms:
-        print(f'--> HMM profile: {hmm} ...')
-        try:
-            if not hmm in already_looked_for:
+        if not hmm in already_looked_for:
+            try:
                 hmmHits, protein_subset = hmmsearch(proteomeFile, hmm, genome_folder, evalue, hmm_coverage)
                 hmmHits = hmmHits[(min_size <= hmmHits['tlen']) & (hmmHits['tlen'] <= max_size )]
-                print(f'---> A total of {len(hmmHits)} were found for {hmm}.')
+                if i==0:
+                    print(f'--> A total of {len(hmmHits)} were found for {hmm}.')
+                else:
+                    print(f'--> A total of {len(hmmHits)} of  {hmm} were found in proteins \n    with the other domains in the Architecture definition: {"-".join(hmms[0:i])}.')
                 if len(hmmHits) == 0:
-                    print(f'--> {hmm} not found on {genome_name}, skipping...')
+                    print(f'--> At least One of the HMMs in the Architecture definition ({"-".join(hmms)}) not found on {genome_name}, skipping...')
                     return(pd.DataFrame(columns=['target name','tlen']), pd.DataFrame(columns=['target name', 'accession', 'tlen', 'query name', 'qaccession', 'qlen', 'E-value', 'score', 'bias', '#', 'of', 'c-Evalue', 'i-Evalue', 'dom score', 'dom bias', 'hmm from', 'hmm to', 'ali from', 'ali to', 'env from', 'env to', 'acc', 'description of target']))
                 all_hits_table = pd.concat([all_hits_table,hmmHits])
                 proteomeFile = extract_protein_subset(genbankDict, protein_subset)
                 already_looked_for.append(hmm)
-        except:
-            already_looked_for.append(hmm)
-            #sys.exit(f'An error occurred while searching for {hmm}')
-            return(pd.DataFrame(columns=['target name','tlen']), pd.DataFrame(columns=['target name', 'accession', 'tlen', 'query name', 'qaccession', 'qlen', 'E-value', 'score', 'bias', '#', 'of', 'c-Evalue', 'i-Evalue', 'dom score', 'dom bias', 'hmm from', 'hmm to', 'ali from', 'ali to', 'env from', 'env to', 'acc', 'description of target']))
+                i+=1
+            except:
+                #sys.exit(f'An error occurred while searching for {hmm}')
+                print(f'An error occurred while searching for {hmm}. Please verify the HMM file.')
+                print(f'--> At least One of the HMMs in the Architecture definition ({"-".join(hmms)}) not found on {genome_name}, skipping...')
+                return(pd.DataFrame(columns=['target name','tlen']), pd.DataFrame(columns=['target name', 'accession', 'tlen', 'query name', 'qaccession', 'qlen', 'E-value', 'score', 'bias', '#', 'of', 'c-Evalue', 'i-Evalue', 'dom score', 'dom bias', 'hmm from', 'hmm to', 'ali from', 'ali to', 'env from', 'env to', 'acc', 'description of target']))
     #
     # #check architecture
     domains = get_domain_names(hmms)
@@ -762,7 +767,7 @@ if __name__ == '__main__':
         genbankDict, description, proteomeFile = load_genome(genome_file)
         if not proteomeFile:
             continue
-        #### 
+        ####
         for arch_idx in range(len(architectures)):
             arch = architectures[arch_idx]
             arch_string = '-'.join([ os.path.splitext(os.path.basename(a))[0] for a in arch])
@@ -797,10 +802,10 @@ if __name__ == '__main__':
                 proteins_table['description'] = ' ,'.join([ f'{k}|{v}' for k,v in description.items()])
                 #Evaluate synteny and contiguity
                 #looks for provided HMMs or PFAMs on the genomic context of n up and n down genes. Fist determine if all the hits are contiguous, then extracts adjacent genes.
-                print(f'-> Looking for clusters of proteins with the same domain architecture...')
+                print(f'--> Looking for clusters of proteins with the same domain architecture...')
                 contiguity, up_down = evaluate_contiguity(protein_names, tolerance)
                 #synteny of the architecture: look for expected genes in n up and n down positions
-                # HOW TO PROCESS MULTIPLE ARCHITECTURES 
+                #HOW TO PROCESS MULTIPLE ARCHITECTURES 
                 #returns a list with the genes found or '' if only some or none of the include genes was found. Order is the same of up_down.
                 if len(include_file) > 0:
                     print(f'-> Looking for conserved domains in neighbor proteins...')
@@ -842,3 +847,10 @@ if __name__ == '__main__':
         summary_table = pd.DataFrame(columns=['proteins','Replicon','UID','genome_name','description','contiguity','Cluster Number','Synteny','Protein Copies','Architecture','size','Reference'])
     summary_table.columns = ['Proteins','Replicon','UID','Genome name','Description','Contiguity','Cluster number','Synteny','Protein Copies','Architecture','Size','Reference']
     summary_table.to_csv(save_file, index=False)
+    #filtered summary table: for each protein leave only the architecture with most domains
+    summary_table['Architecture_len'] = summary_table['Architecture'].str.len()
+    summary_table = summary_table.sort_values(['Architecture_len'], ascending=False)
+    filtered_summary_table = summary_table.groupby('UID',as_index=False).first()
+    filtered_summary_table = filtered_summary_table.sort_values(['UID'])
+    save_file_best = os.path.join(inputFolder, 'best_Architectures.csv')
+    filtered_summary_table.to_csv(save_file_best, index=False)

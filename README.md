@@ -1,6 +1,6 @@
 # ArchMMer
 ArchMMer is a python program that uses HMMER hmmsearch tool to look for proteins with a defined domain architecture.
-The domain architecture can be defined either by specifying InterPro IDs (PFAM, CATH, TIGR, PANTHER and Superfamily are suported), or using custom HMMs created with th HMMER suit.
+The domain architecture can be defined either by specifying InterPro IDs (PFAM, CATH, TIGR, PANTHER and Superfamily are suported), or using custom HMMs created with the HMMER suit.
 
 ![ArchMMer](image.png)
 

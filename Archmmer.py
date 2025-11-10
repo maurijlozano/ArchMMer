@@ -525,7 +525,7 @@ if __name__ == '__main__':
             from datetime import datetime
             import re
             if not args.overwrite:
-                inputFolder2 = inputFolder+'_'+re.sub('[:\-_ .]','',str(datetime.now()))
+                inputFolder2 = inputFolder+'_'+re.sub('[:\\-_ .]','',str(datetime.now()))
                 print(f'{inputFolder} folder exists. The results will be saved in {inputFolder2}...')
                 inputFolder = inputFolder2
                 os.mkdir(inputFolder)
@@ -678,7 +678,7 @@ if __name__ == '__main__':
         print('\nPFAM HMM will be used...')
         architectures = [download_architecture_pfams(pfamids,"arch")]
     elif len(hmms) > 0:
-        print('\HMM files will be used...')
+        print('\nHMM files will be used...')
         test_file_list(hmms)
         architectures = [hmms]
     else:
@@ -850,7 +850,7 @@ if __name__ == '__main__':
     #filtered summary table: for each protein leave only the architecture with most domains
     summary_table['Architecture_len'] = summary_table['Architecture'].str.len()
     summary_table = summary_table.sort_values(['Architecture_len'], ascending=False)
-    filtered_summary_table = summary_table.groupby('UID',as_index=False).first()
+    filtered_summary_table = summary_table.groupby('Proteins',as_index=False).first()
     filtered_summary_table = filtered_summary_table.sort_values(['UID'])
     save_file_best = os.path.join(inputFolder, 'best_Architectures.csv')
     filtered_summary_table = filtered_summary_table.drop(['Architecture_len'], axis=1)

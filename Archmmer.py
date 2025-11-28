@@ -290,7 +290,7 @@ def hmmsearch(proteomeFile,hmm, genome_folder, evalue, hmm_coverage):
     subprocess.call(['hmmsearch', "--domtblout", resFile , hmm , proteomeFile], stdout=subprocess.DEVNULL)
     tableHeaders = ['target name', 'accession', 'tlen', 'query name', 'qaccession', 'qlen', 'E-value', 'score', 'bias', '#', 'of', 'c-Evalue', 'i-Evalue', 'dom score', 'dom bias', 'hmm from', 'hmm to', 'ali from', 'ali to', 'env from', 'env to', 'acc', 'description of target']
     try:
-        hmmHits = pd.read_fwf(resFile, comment='#', sep='\\s+', header=None)
+        hmmHits = pd.read_table(resFile, comment='#', sep='\\s+', header=None, usecols=range(22))
     except:
         if 'exclude' in hmm_name:
             print(f'---> No domains in the exclude list were found...')
